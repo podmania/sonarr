@@ -20,8 +20,6 @@
         ];
         config = {
           Env = [
-            "SONARR_CHANNEL=v4-stable"
-            "SONARR_BRANCH=main"
             "COMPlus_EnableDiagnostics=0"
             "TMPDIR=/run/sonarr-temp"
           ];
