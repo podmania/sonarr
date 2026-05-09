@@ -82,3 +82,5 @@ Variables use the format `SONARR__<SECTION>__<KEY>` (double underscores, case-se
 | `SONARR__UPDATE__AUTOMATICALLY` | _(platform default)_ | Auto-install updates |
 | `SONARR__UPDATE__SCRIPTPATH` | _(empty)_ | Path to custom update script |
 | `SONARR__UPDATE__BRANCH` | `main` | Update branch: `main` or `develop` |
+
+<a href="https://www.buymeacoffee.com/bhoehn" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>
