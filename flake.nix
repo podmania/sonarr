@@ -22,6 +22,7 @@
           Env = [
             "COMPlus_EnableDiagnostics=0"
             "TMPDIR=/run/sonarr-temp"
+            "SONARR__UPDATE__MECHANISM=Docker"
           ];
           ExposedPorts = {
             "8989/tcp" = {};
