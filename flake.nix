@@ -11,28 +11,38 @@
     system = builtins.currentSystem;
     pkgs = nixpkgs.legacyPackages.${system};
     n2c = nix2container.outputs.packages.${system}.nix2container;
+    imageConfig = {
+      Env = [
+        "COMPlus_EnableDiagnostics=0"
+        "TMPDIR=/run/sonarr-temp"
+        "SONARR__UPDATE__MECHANISM=Docker"
+      ];
+      ExposedPorts = {
+        "8989/tcp" = {};
+      };
+      Volumes = {
+        "/config" = {};
+        "/data" = {};
+      };
+      Cmd = [ "${pkgs.sonarr}/bin/Sonarr" "-data=/config" "-nobrowser" ];
+    };
   in {
     packages.${system} = {
       sonarr-image = n2c.buildImage {
         name = "sonarr";
         tag = "latest";
         fromImage = base.packages.${system}.base-image;
-        config = {
-          Env = [
-            "COMPlus_EnableDiagnostics=0"
-            "TMPDIR=/run/sonarr-temp"
-            "SONARR__UPDATE__MECHANISM=Docker"
-          ];
-          ExposedPorts = {
-            "8989/tcp" = {};
-          };
-          Volumes = {
-            "/config" = {};
-            "/data" = {};
-          };
-          Cmd = [ "${pkgs.sonarr}/bin/Sonarr" "-data=/config" "-nobrowser" ];
-        };
+        config = imageConfig;
       };
+
+      sonarr-debug-image = n2c.buildImage {
+        name = "sonarr";
+        tag = "latest-debug";
+        fromImage = base.packages.${system}.base-debug-image;
+        config = imageConfig;
+      };
+
+      sonarr = pkgs.sonarr;
 
       default = self.packages.${system}.sonarr-image;
     };
