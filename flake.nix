@@ -1,23 +1,23 @@
 {
-  description = "Sonarr distroless image";
+  description = "Sonarr distroless image using nix2container";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nix2container.url = "github:nlewo/nix2container";
+    base.url = "github:podmania/base";
   };
 
-  outputs = { self, nixpkgs }: let
+  outputs = { self, nixpkgs, nix2container, base }: let
     system = builtins.currentSystem;
     pkgs = nixpkgs.legacyPackages.${system};
+    n2c = nix2container.outputs.packages.${system}.nix2container;
   in {
     packages.${system} = {
-      sonarr-image = pkgs.dockerTools.buildLayeredImage {
+      sonarr-image = n2c.buildImage {
         name = "sonarr";
         tag = "latest";
-        contents = [ 
-          pkgs.sonarr
-          pkgs.cacert
-          pkgs.tzdata
-        ];
+        fromImage = base.packages.${system}.base-image;
+        copyToRoot = [ pkgs.sonarr ];
         config = {
           Env = [
             "COMPlus_EnableDiagnostics=0"
@@ -27,19 +27,16 @@
             "8989/tcp" = {};
           };
           Volumes = {
-            # From https://sonarr.tv/#downloads-docker recommendations
             "/config" = {};
             "/data" = {};
           };
-          # Tell Sonarr to use /config as its data directory
           Cmd = [ "${pkgs.sonarr}/bin/Sonarr" "-data=/config" "-nobrowser" ];
         };
       };
+
+      default = self.packages.${system}.sonarr-image;
     };
 
-    # Expose the Sonarr version for CI workflows
     sonarrVersion = pkgs.sonarr.version;
-
-    defaultPackage.${system} = self.packages.${system}.sonarr-image;
   };
 }
