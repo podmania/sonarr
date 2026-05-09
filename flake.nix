@@ -33,9 +33,6 @@
           };
           # Tell Sonarr to use /config as its data directory
           Cmd = [ "${pkgs.sonarr}/bin/Sonarr" "-data=/config" "-nobrowser" ];
-          # Distroless non‑root user
-          User = "1000";
-          WorkingDir = "/config";
         };
       };
     };
