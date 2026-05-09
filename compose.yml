@@ -1,0 +1,12 @@
+services:
+  sonarr:
+    image: ghcr.io/podmania/sonarr:latest
+    userns_mode: "keep-id"
+    container_name: sonarr
+    ports:
+      - 8989:8989
+    volumes:
+      - ./config:/config
+      - ./data:/data
+      - /etc/localtime:/etc/localtime:ro
+    restart: unless-stopped
