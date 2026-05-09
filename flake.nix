@@ -17,7 +17,6 @@
         name = "sonarr";
         tag = "latest";
         fromImage = base.packages.${system}.base-image;
-        copyToRoot = [ pkgs.sonarr ];
         config = {
           Env = [
             "COMPlus_EnableDiagnostics=0"
