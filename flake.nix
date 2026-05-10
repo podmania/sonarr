@@ -11,6 +11,17 @@
     system = builtins.currentSystem;
     pkgs = nixpkgs.legacyPackages.${system};
     n2c = nix2container.outputs.packages.${system}.nix2container;
+    version = "4.0.17.2952";
+    srcHash = "sha256-nOpCKQqX6lHBcLtIC18CZ0nCrhXTjpEPcO0L2/kcNEo=";
+    pkg = pkgs.sonarr.overrideAttrs (old: {
+      inherit version;
+      src = pkgs.fetchFromGitHub {
+        owner = "Sonarr";
+        repo = "Sonarr";
+        rev = "v${version}";
+        hash = srcHash;
+      };
+    });
     imageConfig = {
       Env = [
         "COMPlus_EnableDiagnostics=0"
@@ -24,7 +35,7 @@
         "/config" = {};
         "/data" = {};
       };
-      Cmd = [ "${pkgs.sonarr}/bin/Sonarr" "-data=/config" "-nobrowser" ];
+      Cmd = [ "${pkg}/bin/Sonarr" "-data=/config" "-nobrowser" ];
     };
   in {
     packages.${system} = {
@@ -42,11 +53,11 @@
         config = imageConfig;
       };
 
-      sonarr = pkgs.sonarr;
+      sonarr = pkg;
 
       default = self.packages.${system}.sonarr-image;
     };
 
-    sonarrVersion = pkgs.sonarr.version;
+    sonarrVersion = version;
   };
 }
