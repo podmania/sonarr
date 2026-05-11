@@ -9,7 +9,12 @@
 
   outputs = { self, nixpkgs, nix2container, base }: let
     system = builtins.currentSystem;
-    pkgs = nixpkgs.legacyPackages.${system};
+    pkgs = import nixpkgs {
+      inherit system;
+      config.permittedInsecurePackages = [
+        "dotnet-sdk-6.0.428"
+      ];
+    };
     n2c = nix2container.outputs.packages.${system}.nix2container;
     version = "4.0.17.2952";
     srcHash = "sha256-nOpCKQqX6lHBcLtIC18CZ0nCrhXTjpEPcO0L2/kcNEo=";
