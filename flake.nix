@@ -21,6 +21,8 @@
         rev = "v${version}";
         hash = srcHash;
       };
+      nugetDeps = if builtins.pathExists ./deps.json then map (dep: pkgs.fetchNuGet dep) (builtins.fromJSON (builtins.readFile ./deps.json)) else pkgs.sonarr.nugetDeps;
+      dotnetBuildFlags = [ "--maxcpucount:1" ];
     });
     imageConfig = {
       Env = [
