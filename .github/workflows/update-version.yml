@@ -11,4 +11,3 @@ jobs:
       package: sonarr
       upstream: Sonarr/Sonarr
       tag-prefix: v
-      dep-type: dotnet
