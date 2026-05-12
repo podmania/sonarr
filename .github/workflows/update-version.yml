@@ -6,8 +6,65 @@ on:
 
 jobs:
   update:
-    uses: podmania/actions/.github/workflows/update-version.yml@main
-    with:
-      package: sonarr
-      upstream: Sonarr/Sonarr
-      tag-prefix: v
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: write
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: DeterminateSystems/nix-installer-action@main
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Check for new version
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          LATEST=$(gh api "repos/Sonarr/Sonarr/releases/latest" --jq '.tag_name' | sed 's/^v//')
+          CURRENT=$(nix eval --raw .#sonarr.version)
+          echo "latest=${LATEST}" >> "$GITHUB_OUTPUT"
+          echo "current=${CURRENT}" >> "$GITHUB_OUTPUT"
+          if [ "$LATEST" != "$CURRENT" ]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::Sonarr ${CURRENT} → ${LATEST}"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Update nixpkgs
+        if: steps.check.outputs.changed == 'true'
+        run: nix flake lock --update-input nixpkgs
+
+      - name: Check if nixpkgs has new version
+        if: steps.check.outputs.changed == 'true'
+        id: verify
+        run: |
+          UPDATED=$(nix eval --raw .#sonarr.version)
+          echo "updated=${UPDATED}" >> "$GITHUB_OUTPUT"
+          if [ "$UPDATED" != "${{ steps.check.outputs.current }}" ]; then
+            echo "bumped=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "bumped=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::nixpkgs doesn't have Sonarr ${{ steps.check.outputs.latest }} yet"
+          fi
+
+      - name: Commit and push
+        if: steps.verify.outputs.bumped == 'true'
+        run: |
+          OLD="${{ steps.check.outputs.current }}"
+          NEW="${{ steps.verify.outputs.updated }}"
+          git add flake.lock
+          git diff --cached --quiet && echo "No changes to commit" && exit 0
+          git commit -m "chore: sonarr ${OLD} → ${NEW}"
+          git push origin main
+
+      - name: Trigger build-publish workflow
+        if: steps.verify.outputs.bumped == 'true'
+        run: gh workflow run build-publish.yml --ref main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
