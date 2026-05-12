@@ -9,25 +9,8 @@
 
   outputs = { self, nixpkgs, nix2container, base }: let
     system = builtins.currentSystem;
-    pkgs = nixpkgs.legacyPackages.${system};
     n2c = nix2container.outputs.packages.${system}.nix2container;
-    version = "4.0.17.2952";
-    srcHash = "sha256-nOpCKQqX6lHBcLtIC18CZ0nCrhXTjpEPcO0L2/kcNEo=";
-    src = pkgs.fetchFromGitHub {
-      owner = "Sonarr";
-      repo = "Sonarr";
-      rev = "v${version}";
-      hash = srcHash;
-    };
-    pkg = pkgs.sonarr.overrideAttrs (old: {
-      inherit version;
-      src = pkgs.fetchFromGitHub {
-        owner = "Sonarr";
-        repo = "Sonarr";
-        rev = "v${version}";
-        hash = srcHash;
-      };
-    });
+    pkg = pkgs.sonarr;
     imageConfig = {
       Env = [
         "COMPlus_EnableDiagnostics=0"
@@ -64,6 +47,6 @@
       default = self.packages.${system}.sonarr-image;
     };
 
-    sonarrVersion = version;
+    sonarrVersion = pkg.version;
   };
 }
