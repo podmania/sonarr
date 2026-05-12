@@ -9,6 +9,7 @@
 
   outputs = { self, nixpkgs, nix2container, base }: let
     system = builtins.currentSystem;
+    pkgs = nixpkgs.legacyPackages.${system};
     n2c = nix2container.outputs.packages.${system}.nix2container;
     pkg = pkgs.sonarr;
     imageConfig = {
