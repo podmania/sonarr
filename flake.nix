@@ -15,7 +15,7 @@
     imageConfig = {
       Env = [
         "COMPlus_EnableDiagnostics=0"
-        "TMPDIR=/run/sonarr-temp"
+        "TMPDIR=/tmp"
         "SONARR__UPDATE__MECHANISM=Docker"
       ];
       ExposedPorts = {
